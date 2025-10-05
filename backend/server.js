@@ -4,31 +4,13 @@ import app from "./app.js";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { log } from "console";
-import cors from "cors"
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 4000;
 
-// 🔹 Middleware Setup
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-// 🔹 CORS Configuration
-app.use(
-  cors({
-    origin: ["http://localhost:5173","https://biggest-shop-mart.onrender.com"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    origin: "*",
   },
 });
 io.use((socket, next) => {

@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ CORS Setup
 app.use(
   cors({
-    origin: "http://localhost:5173", // tumhara React frontend ka URL
+    origin: ["https://chat-app-t3hq.onrender.com","http://localhost:5173"], // tumhara React frontend ka URL
     credentials: true, // cookies ko allow karne ke liye
   })
 );
