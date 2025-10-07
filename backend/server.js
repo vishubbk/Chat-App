@@ -3,32 +3,26 @@ import http from "http";
 import app from "./app.js";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import { log } from "console";
-const server = http.createServer(app);
+import Message from "./models/message.model.js";
 
+const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+  cors: { origin: "*" },
 });
+
 io.use((socket, next) => {
   try {
     const token =
       socket.handshake.auth?.token ||
       socket.handshake.headers.authorization?.split(" ")[1];
-    const projectId = socket.handshake.query.projectId;
-    console.log(`projectId ${projectId}`);
 
-    if (!token) {
-      return next(new Error("Authentication error"));
-    }
+    if (!token) return next(new Error("Authentication error"));
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return next(new Error("Authentication error"));
-    }
+    if (!decoded) return next(new Error("Authentication error"));
+
     socket.user = decoded;
     next();
   } catch (error) {
@@ -37,26 +31,32 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.user.email);
-
   const projectId = socket.handshake.query.projectId;
-  if (projectId) {
-    socket.join(projectId);
-  }
+  console.log(`projectId ${projectId}`);
 
+  if (projectId) socket.join(projectId);
+
+  // Send message
   socket.on("send-message", async (data) => {
     try {
-      const { content, projectId } = data;
-      const message = {
+      const { content } = data;
+      if (!content || !projectId) return;
+
+      const newMessage = new Message({
         content,
         sender: socket.user.email,
         projectId,
-        timestamp: new Date(),
-      };
+      });
 
-      // Save message to database here if needed
+      await newMessage.save();
 
-      io.to(projectId).emit("new-message", message);
+      io.to(projectId).emit("new-message", {
+        _id: newMessage._id,
+        content: newMessage.content,
+        sender: newMessage.sender,
+        projectId: newMessage.projectId,
+        timestamp: newMessage.timestamp,
+      });
     } catch (error) {
       console.error("Error handling message:", error);
     }
@@ -68,5 +68,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

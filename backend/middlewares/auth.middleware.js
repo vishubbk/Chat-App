@@ -7,7 +7,10 @@ async function authMiddleware(req, res, next) {
 
     if (req.cookies && req.cookies.token) {
       token = req.cookies.token;
-    } else if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ")
+    ) {
       token = req.headers.authorization.split(" ")[1];
     }
 

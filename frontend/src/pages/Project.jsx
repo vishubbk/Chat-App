@@ -23,6 +23,7 @@ const Project = () => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  // ✅ Get logged in user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -31,6 +32,32 @@ const Project = () => {
     }
   }, []);
 
+// ✅ Fetch old messages from DB
+useEffect(() => {
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/messages/${project._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+-     setMessages(res.data); // old messages
++     setMessages(Array.isArray(res.data) ? res.data : res.data.messages || []);
+    } catch (err) {
+      console.error("Error fetching messages", err);
+    }
+  };
+
+  if (project?._id) {
+    fetchMessages();
+  }
+}, [project?._id]);
+
+
+  // ✅ Socket connection setup
   useEffect(() => {
     if (project?._id && user?.email) {
       socketRef.current = initializeSocket(project._id);
@@ -41,7 +68,7 @@ const Project = () => {
 
       socketRef.current.on("new-message", (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" ,block:"end"});
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       });
 
       return () => {
@@ -53,15 +80,24 @@ const Project = () => {
     }
   }, [project?._id, user?.email]);
 
+  
+// Scroll to bottom on initial load or when new messages are added
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]); // whenever messages change, scroll down
+
+  // ✅ Fetch all users
   const allUsers = async () => {
     try {
-      const response = await axios.post(import.meta.env.VITE_API_URL + "/user/all",
-       { projectId: project._id },
-         {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        import.meta.env.VITE_API_URL + "/user/all",
+        { projectId: project._id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setUsers(response.data.users);
     } catch (error) {
       console.error(error);
@@ -75,10 +111,10 @@ const Project = () => {
       setSelectedUsers([...selectedUsers, id]);
     }
   };
-  
+
   const addCollaboratorFunction = async () => {
     try {
-      const response = await axios.put(
+      await axios.put(
         import.meta.env.VITE_API_URL + "/project/add-user",
         {
           projectId: project._id,
@@ -101,19 +137,19 @@ const Project = () => {
     setAvailableUsers(project.users);
   };
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!message.trim() || !socketRef.current) return;
+  // ✅ Send message
+ const handleSendMessage = (e) => {
+  e.preventDefault();
+  if (!message.trim() || !socketRef.current) return;
 
-    const newMessage = {
-      content: message,
-      projectId: project._id,
-      sender: user.email,
-    };
-
-    socketRef.current.emit("send-message", newMessage);
-    setMessage("");
+  const newMessage = {
+    content: message,
   };
+
+  socketRef.current.emit("send-message", newMessage);
+  setMessage("");
+};
+
 
   return (
     <div className="relative w-full">
@@ -175,7 +211,7 @@ const Project = () => {
 
           {/* Messages */}
           <div className="text w-full h-[calc(100vh-130px)] overflow-y-auto p-4">
-            {messages.map((msg, idx) => (
+           {Array.isArray(messages) && messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={
@@ -239,38 +275,45 @@ const Project = () => {
               </div>
 
               <div className="max-h-[400px] overflow-y-auto">
-                {users.map((user) => {
-                  const alreadyMember = project.users.includes(user._id);
-                  return (
-                    <div
-                      key={user._id}
-                      onClick={() =>
-                        !alreadyMember && toggleSelectUser(user._id)
-                      }
-                      className={`flex justify-between items-center p-2 rounded-md mb-2 border ${
-                        alreadyMember
-                          ? "bg-green-200 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
-                    >
-                      <PiUserCircleGearBold className="text-2xl m-1" />
-                      <h2>{user.email}</h2>
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user._id)}
-                        readOnly
-                      />
-                    </div>
-                  );
-                })}
+                {users.filter((user) => !project.users.includes(user._id))
+                  .length === 0 ? (
+                  <h1 className="text-center text-lg font-bold text-gray-700">
+                    All users are already added in this group
+                  </h1>
+                ) : (
+                  users.map((user) => {
+                    const alreadyMember = project.users.includes(user._id);
+                    if (alreadyMember) return null;
+                    return (
+                      <div
+                        key={user._id}
+                        onClick={() =>
+                          !alreadyMember && toggleSelectUser(user._id)
+                        }
+                        className={`flex justify-between items-center p-2 rounded-md mb-2 border cursor-pointer`}
+                      >
+                        <PiUserCircleGearBold className="text-2xl m-1" />
+                        <h2>{user.email}</h2>
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(user._id)}
+                          readOnly
+                        />
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
-              <button
-                onClick={addCollaboratorFunction}
-                className="w-full bg-blue-500 text-white py-2 mt-4 rounded-md"
-              >
-                Add Collaborators
-              </button>
+              {users.filter((user) => !project.users.includes(user._id))
+                .length > 0 && (
+                <button
+                  onClick={addCollaboratorFunction}
+                  className="w-full bg-blue-500 text-white py-2 mt-4 rounded-md"
+                >
+                  Add Collaborators
+                </button>
+              )}
             </div>
           </div>
         )}

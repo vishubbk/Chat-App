@@ -105,15 +105,15 @@ const Home = () => {
         className="justify-center items-center bg-blue-700 w-60 p-5 m-5 text-white font-bold text-lg flex gap-3 cursor-pointer rounded"
         onClick={() => setIsModelOpen(true)}
       >
-        <p>Create Project</p>
+        <p>Create Group</p>
         <p>{}</p>
         <RiLink />
       </div>
       {/* ✅ List of Projects */}
       <div className="m-5">
-        <h2 className="text-2xl font-bold mb-4">All Projects</h2>
+        <h2 className="text-2xl font-bold mb-4">All Groups</h2>
         {projects.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No projects found.</p>
+          <p className="text-gray-500 text-center py-8">No Group found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {projects.map((p) => (
@@ -140,7 +140,7 @@ const Home = () => {
                     })}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
                   >
-                    View Project
+                    View Group
                   </button>
                 </div>
               </div>

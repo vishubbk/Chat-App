@@ -49,55 +49,44 @@ export const getAllProject = async (userId) => {
   }
 };
 
-export const addUsersToProject = async (projectId, users, userId) => {
+export const addUsersToProject = async (projectId, users) => {
   try {
     if (!projectId || !users || !Array.isArray(users)) {
       throw new Error("ProjectID and users are required");
     }
+
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       throw new Error("Invalid Project ID");
     }
 
-    const userExist = await projectModel.findOne({
-      users: {
-        $in: users
-      }
+    // 🔍 Check karo ki koi user already project me hai ya nahi
+    const existingUsers = await projectModel.findOne({
+      _id: projectId,
+      users: { $in: users }   // at least ek user already hai
     });
-    if (userExist) {
-      throw new Error("You can't add same Group again");
+
+    if (existingUsers) {
+      throw new Error("Some users are already in this project");
     }
 
-    const projects = await projectModel.findByIdAndUpdate(
-      projectId, {
-        $addToSet: {
-          users: {
-            $each: users
-          }
-        }
-      }, {
-        new: true
-      }
+    // ✅ Agar nahi mile to add karo
+    const updatedProject = await projectModel.findByIdAndUpdate(
+      projectId,
+      { $addToSet: { users: { $each: users } } }, // duplicate avoid karega
+      { new: true }
     );
 
-    if (!projects) {
+    if (!updatedProject) {
       throw new Error("Project not found");
     }
 
-    // ✅ Now `userId` is a plain ObjectId
-    const project = await projectModel.findOne({
-      _id: projectId,
-      users: userId,
-    });
-    if (!project) {
-      throw new Error("User is not a member of this project");
-    }
-
-    return projects;
+    return updatedProject;
   } catch (error) {
     console.log(error.message);
-    throw new Error("Error fetching projects " + error.message);
+    throw new Error("Error updating project: " + error.message);
   }
 };
+
 
 export const getAllUserFromProjectId = async (projectId) => {
   try {

@@ -5,6 +5,8 @@ import user from "./routes/user.route.js";
 import project from "./routes/project.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import messageRoutes from "./routes/message.route.js";
+
 
 connect();
 
@@ -31,5 +33,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", user);
 app.use("/project", project);
+
+app.use("/api/messages", messageRoutes);
 
 export default app;
