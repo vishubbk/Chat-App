@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // FontAwesome user icon
+import YourGroups from "./YourGroups";
 
 const Home = () => {
   const [isModelOpen, setIsModelOpen] = useState(false);
@@ -110,6 +111,10 @@ const Home = () => {
         <RiLink />
       </div>
       {/* ✅ List of Projects */}
+      <div className="your-groups">
+        <YourGroups/>
+      </div>
+
       <div className="m-5">
         <h2 className="text-2xl font-bold mb-4">All Groups</h2>
         {projects.length === 0 ? (

@@ -32,30 +32,31 @@ const Project = () => {
     }
   }, []);
 
-// ✅ Fetch old messages from DB
-useEffect(() => {
-  const fetchMessages = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/messages/${project._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
--     setMessages(res.data); // old messages
-+     setMessages(Array.isArray(res.data) ? res.data : res.data.messages || []);
-    } catch (err) {
-      console.error("Error fetching messages", err);
+  // ✅ Fetch old messages from DB
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/messages/${project._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        -setMessages(res.data); // old messages
+        +setMessages(
+          Array.isArray(res.data) ? res.data : res.data.messages || []
+        );
+      } catch (err) {
+        console.error("Error fetching messages", err);
+      }
+    };
+
+    if (project?._id) {
+      fetchMessages();
     }
-  };
-
-  if (project?._id) {
-    fetchMessages();
-  }
-}, [project?._id]);
-
+  }, [project?._id]);
 
   // ✅ Socket connection setup
   useEffect(() => {
@@ -68,7 +69,7 @@ useEffect(() => {
 
       socketRef.current.on("new-message", (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       });
 
       return () => {
@@ -80,11 +81,10 @@ useEffect(() => {
     }
   }, [project?._id, user?.email]);
 
-  
-// Scroll to bottom on initial load or when new messages are added
-useEffect(() => {
-  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-}, [messages]); // whenever messages change, scroll down
+  // Scroll to bottom on initial load or when new messages are added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]); // whenever messages change, scroll down
 
   // ✅ Fetch all users
   const allUsers = async () => {
@@ -138,18 +138,17 @@ useEffect(() => {
   };
 
   // ✅ Send message
- const handleSendMessage = (e) => {
-  e.preventDefault();
-  if (!message.trim() || !socketRef.current) return;
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!message.trim() || !socketRef.current) return;
 
-  const newMessage = {
-    content: message,
+    const newMessage = {
+      content: message,
+    };
+
+    socketRef.current.emit("send-message", newMessage);
+    setMessage("");
   };
-
-  socketRef.current.emit("send-message", newMessage);
-  setMessage("");
-};
-
 
   return (
     <div className="relative w-full">
@@ -190,15 +189,21 @@ useEffect(() => {
 
           <header className="bg-white h-15 flex items-center justify-between p-4">
             <button
-              onClick={() => {
-                allUsers();
-                setAddCollaborator(true);
-              }}
-              className="flex gap-2 items-center font-bold cursor-pointer"
-            >
-              <IoMdAdd />
-              <p>Add collaborator</p>
-            </button>
+  onClick={() => {
+    allUsers();
+    setAddCollaborator(true);
+  }}
+  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white 
+             hover:bg-blue-700 transition-all duration-200 font-semibold text-sm 
+             w-60 overflow-hidden cursor-pointer "
+>
+  <IoMdAdd className="text-lg" />
+  <p className="truncate">Add Collaborator</p>
+  <p className="hidden sm:block text-[0.6rem] font-normal text-gray-200 truncate">
+    {project.name}
+  </p>
+</button>
+
 
             <HiMiniUsers
               onClick={() => {
@@ -211,31 +216,32 @@ useEffect(() => {
 
           {/* Messages */}
           <div className="text w-full h-[calc(100vh-130px)] overflow-y-auto p-4">
-           {Array.isArray(messages) && messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={
-                  msg.sender === user?.email
-                    ? "send-msg flex justify-end w-full"
-                    : "accept-msg"
-                }
-              >
+            {Array.isArray(messages) &&
+              messages.map((msg, idx) => (
                 <div
-                  className={`w-fit max-w-[70%] mx-2 my-3 rounded-xl px-4 py-2 ${
+                  key={idx}
+                  className={
                     msg.sender === user?.email
-                      ? "bg-[#1a281a28]"
-                      : "bg-[#281a1a28]"
-                  }`}
+                      ? "send-msg flex justify-end w-full"
+                      : "accept-msg"
+                  }
                 >
-                  <div>
-                    <small className="text-xs font-semibold opacity-65">
-                      {msg.sender === user?.email ? "You" : msg.sender}
-                    </small>
-                    <p>{msg.content}</p>
+                  <div
+                    className={`w-fit max-w-[70%] mx-2 my-3 rounded-xl px-4 py-2 ${
+                      msg.sender === user?.email
+                        ? "bg-[#1a281a28]"
+                        : "bg-[#281a1a28]"
+                    }`}
+                  >
+                    <div>
+                      <small className="text-xs font-semibold opacity-65">
+                        {msg.sender === user?.email ? "You" : msg.sender}
+                      </small>
+                      <p>{msg.content}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             <div ref={messagesEndRef} />
           </div>
 
@@ -267,7 +273,18 @@ useEffect(() => {
           <div className="absolute inset-0 flex justify-center items-center bg-black/50 z-30">
             <div className="bg-[#ffffff6f] w-[40vw] p-6 rounded-xl shadow-lg">
               <div className="flex justify-between items-center border-b pb-2 mb-3">
-                <h2 className="font-bold text-lg">Add Collaborators</h2>
+                <h2
+  className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl 
+             bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 
+             font-semibold text-sm w-60 overflow-hidden"
+>
+  <span className="truncate">Add Collaborators:-</span>
+  <span className="  text-[0.65rem] font-medium  py-0.5 
+                   rounded-full truncate max-w-[80px]">
+   ( {project.name})
+  </span>
+</h2>
+
                 <RxCross2
                   onClick={() => setAddCollaborator(false)}
                   className="cursor-pointer text-xl"

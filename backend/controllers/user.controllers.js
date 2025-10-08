@@ -110,7 +110,7 @@ export const getAllUserController = async (req, res) => {
       .find({ 
         _id: { 
           $ne: loggedInUser._id,       // logged in user exclude
-          $nin: userIdsInProject       // project ke users exclude
+          $nin:  userIdsInProject   // project ke users exclude
         } 
       })
       .select("-password");
@@ -120,6 +120,35 @@ export const getAllUserController = async (req, res) => {
   } catch (error) {
     console.log(error.message)
     res.status(400).send(error.message);
+  }
+};
+
+export const getAllOwnerProjectController = async (req, res) => {
+  try {
+    // 1️⃣ Logged in user email
+    const userEmail = req.user.email;
+
+    // 2️⃣ Find user
+    const user = await userModel.findOne({ email: userEmail });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    console.log("User data:", user);
+
+    // 3️⃣ Fetch full projects using project IDs
+    const projects = await projectModel.find({ _id: { $in: user.projects } });
+
+    // 4️⃣ Send response
+    res.status(200).json({
+      user: {
+        _id: user._id,
+        email: user.email,
+      },
+      projects, // full project details
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error });
   }
 };
 

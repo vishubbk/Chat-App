@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import Project from "./pages/Project";
+import Manage from "./pages/Manage";
 
 const App = () => {
   return (
@@ -16,9 +17,10 @@ const App = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/project" element={<Project/>} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/manage-group" element={<Manage/>} />
       </Routes>
     </Router>
   );
 };
-
+ 
 export default App;

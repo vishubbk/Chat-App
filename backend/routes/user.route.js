@@ -45,4 +45,8 @@ router.get(
 // all route
 router.post("/all", authMiddleware,userController.getAllUserController);
 
+
+// get owner route
+router.get("/ownerProject-all", authMiddleware,userController.getAllOwnerProjectController);
+
 export default router;

@@ -6,6 +6,7 @@ import project from "./routes/project.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import messageRoutes from "./routes/message.route.js";
+import aiRoutes from "./routes/ai.route.js";
 
 
 connect();
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 // ✅ CORS Setup
 app.use(
@@ -33,7 +35,11 @@ app.get("/", (req, res) => {
 
 app.use("/user", user);
 app.use("/project", project);
+app.use("/aiHelp", aiRoutes);
 
 app.use("/api/messages", messageRoutes);
+
+
+
 
 export default app;

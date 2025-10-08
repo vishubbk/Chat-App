@@ -1,6 +1,6 @@
 import express from "express";
 import { createMessage, getMessages } from "../controllers/message.controllers.js";
-import authMiddleware  from "../middlewares/auth.middleware.js"; // agar tumne banaya hai
+import authMiddleware  from "../middlewares/auth.middleware.js"; 
 
 const router = express.Router();
 
