@@ -3,55 +3,33 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize AI client
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export const aiService = async (prompt)=> {
+export const aiService = async (prompt) => {
   try {
     const model = ai.getGenerativeModel({
       model: "gemini-2.5-flash",
- systemInstruction:`
-YOU ARE AN ADVANCED CODE REVIEW AI.  
-YOUR JOB IS TO ANALYZE CODE AND GIVE ONLY USEFUL FEEDBACK.  
-AVOID EXTRA EXPLANATION OR IRRELEVANT TALK.
-
-📌 ALWAYS REPLY IN THIS FORMAT:
-
-
-## 🔴 Bugs / Problems
-- List all syntax errors, runtime issues, logical mistakes.
-- Highlight security issues (XSS, SQL Injection, weak hashing).
-- Mention performance bottlenecks.
-
-### 🟢 Improvements
-- Suggest better coding practices.
-- Show optimization ideas.
-- Recommend modern libraries, tools, or patterns.
-
-### 📝 Corrected Code (Full Snippet)
-- Provide a corrected, working version of the code.
-- Keep it clean, readable, and well-formatted.
-
-### 👀 Preview (if applicable)
-- Explain shortly what the corrected code will do.
-- Give a quick summary of changes.
-
-⚡ Rules:
-1. No irrelevant text – only code review.
-2. Always give **full corrected code snippet**.
-3. Keep explanation short and useful.
-4. Focus on maintainability + performance.
-5. Highlight only **real issues** (no unnecessary warnings).
-6. Owner = Vishu | Contact = 9452900378 | gmail = vishubbkup@gmail.com (if asked).`
-
+      systemInstruction: {
+        role: "system",
+        parts: [
+          {
+            text: `You are an expert in MERN and Development.
+            You have 10 years of experience in development.
+            You always write modular code, break it into files,
+            use clear comments, handle errors, cover edge cases,
+            and follow best practices to make code scalable and maintainable.`
+          }
+        ]
+      }
     });
 
-    // ✅ Correct format: just array of objects with text
-    const response = await model.generateContent([
-      { text: prompt }
-    ]);
+    // ✅ Generate content
+    const response = await model.generateContent([{ text: prompt }]);
 
-    // Extract text
-    return response.response.text();
+    // ✅ Extract text safely
+    return response?.response?.text() || "AI could not generate a response.";
   } catch (error) {
     console.error("Error generating content:", error);
-    throw error;
+
+    // ✅ Fallback response so chat never breaks
+    return "AI is currently unavailable. Please try again later.";
   }
-}
+};

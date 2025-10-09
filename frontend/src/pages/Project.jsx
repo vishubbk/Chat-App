@@ -5,7 +5,9 @@ import { IoMdSend, IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { PiUserCircleGearBold } from "react-icons/pi";
 import axios from "axios";
-import { initializeSocket } from "../config/socket";
+import "../index.css"
+import { initializeSocket } from "../config/socket"
+import Markdown from "markdown-to-jsx";
 
 const Project = () => {
   const location = useLocation();
@@ -193,8 +195,8 @@ const Project = () => {
     allUsers();
     setAddCollaborator(true);
   }}
-  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white 
-             hover:bg-blue-700 transition-all duration-200 font-semibold text-sm 
+  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white
+             hover:bg-blue-700 transition-all duration-200 font-semibold text-sm
              w-60 overflow-hidden cursor-pointer "
 >
   <IoMdAdd className="text-lg" />
@@ -231,13 +233,14 @@ const Project = () => {
                       msg.sender === user?.email
                         ? "bg-[#1a281a28]"
                         : "bg-[#281a1a28]"
-                    }`}
+                    } `}
                   >
                     <div>
                       <small className="text-xs font-semibold opacity-65">
                         {msg.sender === user?.email ? "You" : msg.sender}
                       </small>
-                      <p>{msg.content}</p>
+                      
+                      <p >{msg.content}</p>
                     </div>
                   </div>
                 </div>
@@ -274,12 +277,12 @@ const Project = () => {
             <div className="bg-[#ffffff6f] w-[40vw] p-6 rounded-xl shadow-lg">
               <div className="flex justify-between items-center border-b pb-2 mb-3">
                 <h2
-  className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl 
-             bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 
+  className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl
+             bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200
              font-semibold text-sm w-60 overflow-hidden"
 >
   <span className="truncate">Add Collaborators:-</span>
-  <span className="  text-[0.65rem] font-medium  py-0.5 
+  <span className="  text-[0.65rem] font-medium  py-0.5
                    rounded-full truncate max-w-[80px]">
    ( {project.name})
   </span>
