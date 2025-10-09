@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ CORS Setup
 app.use(
   cors({
-    origin: ["https://chat-app-frontend-rpez.onrender.com/","http://localhost:5173"], // tumhara React frontend ka URL
+    origin: ["https://chat-app-frontend-rpez.onrender.com","http://localhost:5173"], // tumhara React frontend ka URL
     credentials: true, // cookies ko allow karne ke liye
   })
 );
