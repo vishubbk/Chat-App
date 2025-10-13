@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.2",
+    "json5": "^2.2.3",
     "markdown-to-jsx": "^6.6.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
