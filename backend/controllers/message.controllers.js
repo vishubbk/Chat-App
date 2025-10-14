@@ -23,9 +23,10 @@ export const createMessage = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const messages = await Message.find({ projectId })
+    const messages1 = await Message.find({ projectId })
       .populate("sender", "email")
       .sort({ createdAt: 1 });
+        const messages = messages1.reverse();
 
     res.status(200).json({ messages });
   } catch (error) {
