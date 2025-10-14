@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HiMiniUsers } from "react-icons/hi2";
 import { IoMdSend, IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
@@ -15,8 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 const Project = () => {
   const location = useLocation();
   const { project } = location.state || {};
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate();
 
   const [togglebutton, setTogglebutton] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -37,10 +36,10 @@ const Project = () => {
   // ✅ Get logged in user
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if(!token){
-       toast.error("You need to login first.");
-          setTimeout(() => navigate("/login"), 1000);
-          return;
+    if (!token) {
+      toast.error("You need to login first.");
+      setTimeout(() => navigate("/login"), 1000);
+      return;
     }
     if (token) {
       const userInfo = JSON.parse(atob(token.split(".")[1]));
@@ -128,7 +127,10 @@ const Project = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
         // ✅ Live update fileTree if AI sends new code
-        if (newMessage.sender === "ai" && newMessage.content.includes("fileTree")) {
+        if (
+          newMessage.sender === "ai" &&
+          newMessage.content.includes("fileTree")
+        ) {
           try {
             const fileTreeMatch = newMessage.content.match(
               /"fileTree":\s*(\{[\s\S]*\})\s*,\s*"buildCommand"/
@@ -186,7 +188,7 @@ const Project = () => {
 
   const addCollaboratorFunction = async () => {
     if (isAddingCollaborator) return;
-    
+
     try {
       setIsAddingCollaborator(true);
       await axios.put(
@@ -205,7 +207,9 @@ const Project = () => {
       setSelectedUsers([]);
       toast.success("Collaborators added successfully!");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to add collaborators");
+      toast.error(
+        error.response?.data?.message || "Failed to add collaborators"
+      );
     } finally {
       setIsAddingCollaborator(false);
     }
@@ -318,7 +322,7 @@ const Project = () => {
                     }`}
                   >
                     <div className="flex flex-col">
-                      <small className="text-xs font-semibold opacity-65 mb-1">
+                      <small className="text-xs font-semiboadd server.js and gitignore and controllders and middlewares ld opacity-65 mb-1">
                         {msg.sender === user?.email
                           ? "You"
                           : msg.sender === "ai"
@@ -337,10 +341,7 @@ const Project = () => {
           </div>
 
           {/* Input */}
-          <form
-            onSubmit={handleSendMessage}
-            className="msg  w-full p-4"
-          >
+          <form onSubmit={handleSendMessage} className="msg  w-full p-4">
             <div className="relative flex items-center bg-white mt-2 rounded-full">
               <input
                 type="text"
@@ -353,23 +354,25 @@ const Project = () => {
                 type="submit"
                 disabled={isSending}
                 className={`absolute right-3 transition-colors ${
-                  isSending 
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-blue-600 hover:text-blue-700'
+                  isSending
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700"
                 }`}
               >
-                <IoMdSend className={`text-xl ${isSending ? 'animate-pulse' : ''}`} />
+                <IoMdSend
+                  className={`text-xl ${isSending ? "animate-pulse" : ""}`}
+                />
               </button>
             </div>
           </form>
         </section>
 
         {/* RIGHT SECTION */}
-       <section
-  className={`right w-[70%] flex ${
-    Object.keys(fileTree).length === 0 ? "hidden" : "block"
-  }`}
->
+        <section
+          className={`right w-[70%] flex ${
+            Object.keys(fileTree).length === 0 ? "hidden" : "block"
+          }`}
+        >
           <div className="right-left w-[30%] h-full bg-gray-100 p-4">
             {Object.keys(fileTree).length > 0 ? (
               Object.keys(fileTree).map((file, index) => (
@@ -387,7 +390,9 @@ const Project = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 mt-4">
-            No folder was found. @AI, kindly generate the required response — for example, create an Express server and show its file structure.”
+                No folder was found. @AI, kindly generate the required response
+                — for example, create an Express server and show its file
+                structure.”
               </p>
             )}
           </div>
@@ -463,18 +468,23 @@ const Project = () => {
                 onClick={addCollaboratorFunction}
                 disabled={isAddingCollaborator}
                 className={`w-full py-2 mt-4 rounded-md transition-colors ${
-                  isAddingCollaborator 
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-500 hover:bg-blue-600'
+                  isAddingCollaborator
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
                 } text-white`}
               >
-                {isAddingCollaborator ? 'Adding...' : 'Add Collaborators'}
+                {isAddingCollaborator ? "Adding..." : "Add Collaborators"}
               </button>
             </div>
           </div>
         )}
       </div>
-      <ToastContainer position="top-right" autoClose={2500} hideProgressBar closeOnClick />
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar
+        closeOnClick
+      />
     </div>
   );
 };

@@ -12,7 +12,10 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: { origin: [
+      "https://chat-app-frontend-rpez.onrender.com",
+      "http://localhost:5173",
+    ], },
 });
 
 io.use((socket, next) => {
