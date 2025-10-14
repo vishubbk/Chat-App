@@ -62,6 +62,7 @@ const Project = () => {
           // Extract AI plain text
           const textMatch = aiMsg.content.match(/"text":\s*"([^"]+)"/);
           const cleanText = textMatch ? textMatch[1] : null;
+          console.log("🧠 AI Text:", cleanText);
 
           // ✅ Extract fileTree JSON dynamically
           const fileTreeMatch = aiMsg.content.match(
@@ -124,7 +125,7 @@ const Project = () => {
             if (fileTreeMatch) {
               const dynamicTree = JSON5.parse(fileTreeMatch[1]);
               setFileTree(dynamicTree);
-            
+              console.log("📁 Live Updated FileTree:", dynamicTree);
             }
           } catch (err) {
             console.error("Error parsing fileTree from AI:", err.message);
@@ -274,7 +275,7 @@ const Project = () => {
           </header>
 
           {/* Messages */}
-          <div className="Messages text w-full h-[calc(100vh-130px)] overflow-y-auto p-4">
+          <div className="Messages text w-full h-[70vh] -mb-6 overflow-y-auto p-4">
             {Array.isArray(messages) &&
               messages.map((msg, idx) => (
                 <div
@@ -284,7 +285,7 @@ const Project = () => {
                   }`}
                 >
                   <div
-                    className={`relative mx-2 my-3 rounded-xl px-4 py-2 max-w-[70%] ${
+                    className={`relative mx-2 my-3 rounded-xl px-4 py-2 max-w-[70%]  ${
                       msg.sender === "ai"
                         ? "bg-black text-white"
                         : msg.sender === user?.email
@@ -314,9 +315,9 @@ const Project = () => {
           {/* Input */}
           <form
             onSubmit={handleSendMessage}
-            className="msg absolute bottom-0 w-full p-4"
+            className="msg  w-full p-4"
           >
-            <div className="relative flex items-center">
+            <div className="relative flex items-center bg-white mt-2 rounded-full">
               <input
                 type="text"
                 value={message}
@@ -335,7 +336,11 @@ const Project = () => {
         </section>
 
         {/* RIGHT SECTION */}
-        <section className="right w-[70%] flex">
+       <section
+  className={`right w-[70%] flex ${
+    Object.keys(fileTree).length === 0 ? "hidden" : "block"
+  }`}
+>
           <div className="right-left w-[30%] h-full bg-gray-100 p-4">
             {Object.keys(fileTree).length > 0 ? (
               Object.keys(fileTree).map((file, index) => (
@@ -353,7 +358,7 @@ const Project = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 mt-4">
-            No folder was found. @AI, kindly generate the required response — for example, create an Express server and show its file structure.
+            No folder was found. @AI, kindly generate the required response — for example, create an Express server and show its file structure.”
               </p>
             )}
           </div>
