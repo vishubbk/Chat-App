@@ -6,6 +6,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // FontAwesome user icon
 import YourGroups from "./YourGroups";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Home = () => {
   const [isModelOpen, setIsModelOpen] = useState(false);
@@ -93,6 +95,15 @@ const Home = () => {
     });
   };
 
+  const loginCheck = async (e) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first.");
+      setTimeout(() => navigate("/login"), 1000);
+      return;
+    }
+  };
+
   return (
     <div className="">
       {" "}
@@ -104,7 +115,10 @@ const Home = () => {
       {/* Create Project Button */}
       <div
         className="justify-center items-center bg-blue-700 w-60 p-5 m-5 text-white font-bold text-lg flex gap-3 cursor-pointer rounded"
-        onClick={() => setIsModelOpen(true)}
+        onClick={() => {
+          loginCheck();
+          setIsModelOpen(true);
+        }}
       >
         <p>Create Group</p>
         <p>{}</p>
@@ -112,9 +126,8 @@ const Home = () => {
       </div>
       {/* ✅ List of Projects */}
       <div className="your-groups">
-        <YourGroups/>
+        <YourGroups />
       </div>
-
       <div className="m-5">
         <h2 className="text-2xl font-bold mb-4">All Groups</h2>
         {projects.length === 0 ? (
@@ -140,9 +153,11 @@ const Home = () => {
                 </div>
                 <div className="flex justify-end">
                   <button
-                    onClick={() => navigate(`/project`,{
-                      state:{project:p}
-                    })}
+                    onClick={() =>
+                      navigate(`/project`, {
+                        state: { project: p },
+                      })
+                    }
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
                   >
                     View Group
@@ -187,6 +202,12 @@ const Home = () => {
           </div>
         </div>
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar
+        closeOnClick
+      />
     </div>
   );
 };

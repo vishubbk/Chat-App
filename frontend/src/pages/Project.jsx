@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 import { HiMiniUsers } from "react-icons/hi2";
 import { IoMdSend, IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
@@ -9,10 +9,14 @@ import "../index.css";
 import { initializeSocket } from "../config/socket";
 import Markdown from "markdown-to-jsx";
 import JSON5 from "json5";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Project = () => {
   const location = useLocation();
   const { project } = location.state || {};
+    const navigate = useNavigate();
+  
 
   const [togglebutton, setTogglebutton] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -24,6 +28,8 @@ const Project = () => {
   const [user, setUser] = useState(null);
   const [selectedFile, setSelectedFile] = useState("");
   const [fileTree, setFileTree] = useState({});
+  const [isSending, setIsSending] = useState(false);
+  const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -31,6 +37,11 @@ const Project = () => {
   // ✅ Get logged in user
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if(!token){
+       toast.error("You need to login first.");
+          setTimeout(() => navigate("/login"), 1000);
+          return;
+    }
     if (token) {
       const userInfo = JSON.parse(atob(token.split(".")[1]));
       setUser(userInfo);
@@ -174,7 +185,10 @@ const Project = () => {
   };
 
   const addCollaboratorFunction = async () => {
+    if (isAddingCollaborator) return;
+    
     try {
+      setIsAddingCollaborator(true);
       await axios.put(
         import.meta.env.VITE_API_URL + "/project/add-user",
         {
@@ -189,8 +203,11 @@ const Project = () => {
       );
       setAddCollaborator(false);
       setSelectedUsers([]);
+      toast.success("Collaborators added successfully!");
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.response?.data?.message || "Failed to add collaborators");
+    } finally {
+      setIsAddingCollaborator(false);
     }
   };
 
@@ -199,16 +216,23 @@ const Project = () => {
   };
 
   // ✅ Send message
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!message.trim() || !socketRef.current) return;
+    if (!message.trim() || !socketRef.current || isSending) return;
 
-    const newMessage = {
-      content: message,
-    };
+    try {
+      setIsSending(true);
+      const newMessage = {
+        content: message,
+      };
 
-    socketRef.current.emit("send-message", newMessage);
-    setMessage("");
+      socketRef.current.emit("send-message", newMessage);
+      setMessage("");
+    } catch (error) {
+      toast.error("Failed to send message");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -327,9 +351,14 @@ const Project = () => {
               />
               <button
                 type="submit"
-                className="absolute right-3 text-blue-600 hover:text-blue-700 transition-colors"
+                disabled={isSending}
+                className={`absolute right-3 transition-colors ${
+                  isSending 
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-blue-600 hover:text-blue-700'
+                }`}
               >
-                <IoMdSend className="text-xl" />
+                <IoMdSend className={`text-xl ${isSending ? 'animate-pulse' : ''}`} />
               </button>
             </div>
           </form>
@@ -432,14 +461,20 @@ const Project = () => {
 
               <button
                 onClick={addCollaboratorFunction}
-                className="w-full bg-blue-500 text-white py-2 mt-4 rounded-md"
+                disabled={isAddingCollaborator}
+                className={`w-full py-2 mt-4 rounded-md transition-colors ${
+                  isAddingCollaborator 
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } text-white`}
               >
-                Add Collaborators
+                {isAddingCollaborator ? 'Adding...' : 'Add Collaborators'}
               </button>
             </div>
           </div>
         )}
       </div>
+      <ToastContainer position="top-right" autoClose={2500} hideProgressBar closeOnClick />
     </div>
   );
 };
