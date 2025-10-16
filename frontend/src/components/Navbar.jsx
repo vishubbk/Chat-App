@@ -45,12 +45,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <button
-                onClick={handleProtectedLink}
-                className="text-white hover:text-gray-300"
-              >
-                Manage Group
-              </button>
+            
               <button
                 onClick={handleLogout}
                 className="text-white hover:text-gray-300"
