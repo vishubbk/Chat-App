@@ -32,7 +32,6 @@ const Project = () => {
   const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
   const inputRef = useRef(null);
 
-
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -233,7 +232,7 @@ const Project = () => {
 
       socketRef.current.emit("send-message", newMessage);
       setMessage("");
-      inputRef.current?.focus(); 
+      inputRef.current?.focus();
     } catch (error) {
       toast.error("Failed to send message");
     } finally {
@@ -422,19 +421,17 @@ const Project = () => {
 
         {/* Add Collaborator PopUp */}
         {addCollaborator && (
-          <div className="absolute inset-0 flex justify-center items-center bg-black/50 z-30">
-            <div className="bg-[#ffffff6f] w-[40vw] p-6 rounded-xl shadow-lg">
+          <div className="fixed inset-0 flex justify-center items-center bg-black/50 z-30 p-4">
+            <div className="bg-white/90 w-full max-w-md sm:max-w-lg md:max-w-xl p-6 rounded-xl shadow-lg overflow-hidden">
+              {/* Header */}
               <div className="flex justify-between items-center border-b pb-2 mb-3">
                 <h2
                   className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl
              bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200
-             font-semibold text-sm w-60 overflow-hidden"
+             font-semibold text-sm w-full sm:w-60 overflow-hidden"
                 >
                   <span className="truncate">Add Collaborators:-</span>
-                  <span
-                    className="text-[0.65rem] font-medium py-0.5
-                   rounded-full truncate max-w-[80px]"
-                  >
+                  <span className="text-[0.65rem] font-medium py-0.5 rounded-full truncate max-w-[80px]">
                     ({project.name})
                   </span>
                 </h2>
@@ -445,7 +442,8 @@ const Project = () => {
                 />
               </div>
 
-              <div className="max-h-[400px] overflow-y-auto">
+              {/* Users List */}
+              <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
                 {users.filter((u) => !project.users.includes(u._id)).length ===
                 0 ? (
                   <h1 className="text-center text-lg font-bold text-gray-700">
@@ -464,7 +462,7 @@ const Project = () => {
                         className="flex justify-between items-center p-2 rounded-md mb-2 border cursor-pointer"
                       >
                         <PiUserCircleGearBold className="text-2xl m-1" />
-                        <h2>{u.email}</h2>
+                        <h2 className="truncate">{u.email}</h2>
                         <input
                           type="checkbox"
                           checked={selectedUsers.includes(u._id)}
@@ -476,6 +474,7 @@ const Project = () => {
                 )}
               </div>
 
+              {/* Button */}
               <button
                 onClick={addCollaboratorFunction}
                 disabled={isAddingCollaborator}
