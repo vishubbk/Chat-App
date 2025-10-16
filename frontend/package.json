@@ -20,7 +20,7 @@
     "react-router-dom": "^7.9.1",
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
-    "sweetalert2": "^11.23.0",
+    "sweetalert2": "^11.26.2",
     "tailwindcss": "^4.1.13",
     "toastify-js": "^1.12.0"
   },

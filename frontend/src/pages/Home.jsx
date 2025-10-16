@@ -4,7 +4,7 @@ import { RiLink } from "react-icons/ri";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa"; // FontAwesome user icon
+import { FaUserCircle } from "react-icons/fa";
 import YourGroups from "./YourGroups";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,7 +15,7 @@ const Home = () => {
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
 
-  // ✅ Fetch all projects when component mounts
+  // Fetch all projects
   useEffect(() => {
     async function allProjects() {
       try {
@@ -35,10 +35,9 @@ const Home = () => {
     allProjects();
   }, []);
 
-  // ✅ Handle project creation
+  // Handle project creation
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!projectName.trim()) {
       Swal.fire({
         icon: "warning",
@@ -64,23 +63,17 @@ const Home = () => {
             import.meta.env.VITE_API_URL + "/project/create",
             { name: projectName },
             {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             }
           );
 
           Swal.fire({
             icon: "success",
             title: "Project Created!",
-            text: `Your project "${
-              response.data.project?.name || projectName
-            }" has been created successfully.`,
+            text: `Your project "${response.data.project?.name || projectName}" has been created successfully.`,
           });
 
-          // ✅ Update project list without refreshing
           setProjects((prev) => [...prev, response.data.project]);
-
           setProjectName("");
           setIsModelOpen(false);
         } catch (error) {
@@ -95,7 +88,8 @@ const Home = () => {
     });
   };
 
-  const loginCheck = async (e) => {
+  // Login check
+  const loginCheck = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("You need to login first.");
@@ -105,109 +99,111 @@ const Home = () => {
   };
 
   return (
-    <div className="">
-      {" "}
-      {/* temporary styling */}
-      {/* Navbar */}
-      <div className="sticky top-0 z-50">
-        <Navbar />
+    <div className="relative h-full w-full">
+      {/* Purple blurred circle background */}
+      <div className="absolute top-0 -z-10 h-full w-full bg-white">
+        <div
+          className="absolute top-0 right-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-[rgba(173,109,244,0.5)] opacity-50 blur-[80px]"
+        ></div>
       </div>
-      {/* Create Project Button */}
-      <div
-        className="justify-center items-center bg-blue-700 w-60 p-5 m-5 text-white font-bold text-lg flex gap-3 cursor-pointer rounded"
-        onClick={() => {
-          loginCheck();
-          setIsModelOpen(true);
-        }}
-      >
-        <p>Create Group</p>
-        <p>{}</p>
-        <RiLink />
-      </div>
-      {/* ✅ List of Projects */}
-      <div className="your-groups">
-        <YourGroups />
-      </div>
-      <div className="m-5">
-        <h2 className="text-2xl font-bold mb-4">All Groups</h2>
-        {projects.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No Group found.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {projects.map((p) => (
-              <div
-                key={p._id}
-                className="mb-2 w-64 p-4 flex-col justify-between bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-              >
-                <div>
-                  <h1 className="text-xl font-semibold mb-2 truncate">
-                    {p.name}
-                  </h1>
-                  <div className="flex items-center gap-2 text-gray-600 mb-2">
-                    <FaUserCircle className="text-lg" />
-                    <span>{p.users.length} members</span>
+
+      {/* Actual content */}
+      <div className="relative z-10">
+        {/* Navbar */}
+        <div className="sticky top-0 z-50">
+          <Navbar />
+        </div>
+
+        {/* Create Group Button */}
+        <div
+          className="justify-center items-center bg-blue-700 w-60 p-5 m-5 text-white font-bold text-lg flex gap-3 cursor-pointer rounded"
+          onClick={() => {
+            loginCheck();
+            setIsModelOpen(true);
+          }}
+        >
+          <p>Create Group</p>
+          <RiLink />
+        </div>
+
+        {/* Your Groups */}
+        <div className="your-groups">
+          <YourGroups />
+        </div>
+
+        {/* All Groups */}
+        <div className="m-5">
+          <h2 className="text-2xl font-bold mb-4">All Groups</h2>
+          {projects.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No Group found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {projects.map((p) => (
+                <div
+                  key={p._id}
+                  className="mb-2 w-64 p-4 flex-col justify-between bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <div>
+                    <h1 className="text-xl font-semibold mb-2 truncate">{p.name}</h1>
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <FaUserCircle className="text-lg" />
+                      <span>{p.users.length} members</span>
+                    </div>
+                    <p className="text-gray-500 text-sm mb-4">
+                      {p.description || "No description"}
+                    </p>
                   </div>
-                  <p className="text-gray-500 text-sm mb-4">
-                    {p.description || "No description"}
-                  </p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() =>
+                        navigate(`/project`, { state: { project: p } })
+                      }
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
+                    >
+                      View Group
+                    </button>
+                  </div>
                 </div>
-                <div className="flex justify-end">
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Modal */}
+        {isModelOpen && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-5 rounded-2xl shadow-md w-96">
+              <h2 className="text-lg font-bold mb-4">Create a New Project</h2>
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  placeholder="Project Name"
+                  className="border p-2 mb-4 w-full rounded"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                />
+                <div className="flex justify-end gap-3">
                   <button
-                    onClick={() =>
-                      navigate(`/project`, {
-                        state: { project: p },
-                      })
-                    }
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
+                    type="button"
+                    onClick={() => setIsModelOpen(false)}
+                    className="bg-gray-400 px-4 py-2 rounded text-white"
                   >
-                    View Group
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 px-4 py-2 rounded text-white"
+                  >
+                    Add Project
                   </button>
                 </div>
-              </div>
-            ))}
+              </form>
+            </div>
           </div>
         )}
+
+        <ToastContainer position="top-right" autoClose={2500} hideProgressBar closeOnClick />
       </div>
-      {/* Modal */}
-      {isModelOpen && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-2xl shadow-md w-96">
-            <h2 className="text-lg font-bold mb-4">Create a New Project</h2>
-
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Project Name"
-                className="border p-2 mb-4 w-full rounded"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModelOpen(false)}
-                  className="bg-gray-400 px-4 py-2 rounded text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 px-4 py-2 rounded text-white"
-                >
-                  Add Project
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      <ToastContainer
-        position="top-right"
-        autoClose={2500}
-        hideProgressBar
-        closeOnClick
-      />
     </div>
   );
 };

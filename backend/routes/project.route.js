@@ -37,4 +37,20 @@ router.get("/get-project-by-owner", authMiddleware,
   projectController.getProjectByOwnerControllers);
 
 
+router.delete("/delete/:projectId", authMiddleware,
+  projectController.deleteProjectByControllers);
+
+
+router.put("/update/:projectId", authMiddleware,
+  projectController.updateProjectByControllers);
+
+
+router.get("/getProjectusers/:projectId", authMiddleware,
+  projectController.ProjectusersProjectByControllers);
+
+
+router.put("/removeUser/:projectId", authMiddleware,
+  projectController.removeUserProjectByControllers);
+
+
 export default router;
