@@ -22,11 +22,12 @@ export const createMessage = async (req, res) => {
 // Get all messages of a project
 export const getMessages = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { projectId } = req.params;
-    const messages1 = await Message.find({ projectId })
+    const messages = await Message.find({ projectId,deletedFor: { $ne: userId }, })
       .populate("sender", "email")
       .sort({ createdAt: 1 });
-        const messages = messages1.reverse();
+        
 
     res.status(200).json({ messages });
   } catch (error) {
@@ -34,3 +35,28 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//deleteMessages of a project
+export const deleteMessages = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+      const userId = req.user.id;
+      if (!messageId || !userId){
+        return res.status(400).json({message:"Messages or User is undefined"})
+      }
+
+     const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ msg: "Message not found" });
+
+     if (!message.deletedFor.includes(userId)) {
+      message.deletedFor.push(userId);
+      await message.save();
+    }
+
+    res.json({ msg: "Message deleted for you", message });
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};  
+      

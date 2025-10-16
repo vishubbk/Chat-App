@@ -30,6 +30,8 @@ const Project = () => {
   const [fileTree, setFileTree] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
+  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 });
+  const [selectedMessage, setSelectedMessage] = useState(null);
   const inputRef = useRef(null);
 
   const socketRef = useRef(null);
@@ -240,6 +242,65 @@ const Project = () => {
     }
   };
 
+  const handleContextMenu = (e, msg) => {
+    e.preventDefault();
+    setSelectedMessage(msg);
+    setContextMenu({
+      show: true,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu({ show: false, x: 0, y: 0 });
+    setSelectedMessage(null);
+  };
+
+  const handleMessageAction = async (action) => {
+    if (!selectedMessage) return;
+
+    try {
+      switch (action) {
+        case "delete":
+          await axios.put(
+            `${import.meta.env.VITE_API_URL}/api/messages/deleteMessage/${
+              selectedMessage._id
+            }`,
+            {}, 
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          setMessages((prev) =>
+            prev.filter((msg) => msg._id !== selectedMessage._id)
+          );
+          
+          break;
+        case "copy":
+          await navigator.clipboard.writeText(selectedMessage.content);
+          toast.success("Message copied to clipboard");
+          break;
+       
+      }
+    } catch (error) {
+      toast.error("Failed to perform action");
+    } finally {
+      handleCloseContextMenu();
+    }
+  };
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleClick = () => handleCloseContextMenu();
+    if (contextMenu.show) {
+      document.addEventListener("click", handleClick);
+      return () => document.removeEventListener("click", handleClick);
+    }
+  }, [contextMenu.show]);
+
   return (
     <div className="relative w-full ">
       <div className="flex flex-col lg:flex-row w-full h-screen">
@@ -314,6 +375,7 @@ const Project = () => {
                   }`}
                 >
                   <div
+                    onContextMenu={(e) => handleContextMenu(e, msg)}
                     className={`relative mx-2 my-1 rounded-2xl px-4 py-2 max-w-[75%] break-words shadow-sm
                       ${
                         msg.sender === "ai"
@@ -489,6 +551,31 @@ const Project = () => {
                 {isAddingCollaborator ? "Adding..." : "Add Collaborators"}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Context Menu */}
+        {contextMenu.show && (
+          <div
+            className="fixed z-50 bg-white rounded-lg shadow-lg py-2 min-w-[150px]"
+            style={{
+              left: Math.min(contextMenu.x, window.innerWidth - 160),
+              top: Math.min(contextMenu.y, window.innerHeight - 150),
+            }}
+          >
+            <button
+              onClick={() => handleMessageAction("delete")}
+              className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600"
+            >
+              Delete Message
+            </button>
+            <button
+              onClick={() => handleMessageAction("copy")}
+              className="w-full px-4 py-2 text-left hover:bg-gray-100"
+            >
+              Copy
+            </button>
+           
           </div>
         )}
       </div>
