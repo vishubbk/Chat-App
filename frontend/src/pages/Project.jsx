@@ -30,6 +30,8 @@ const Project = () => {
   const [fileTree, setFileTree] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
+  const inputRef = useRef(null);
+
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -231,6 +233,7 @@ const Project = () => {
 
       socketRef.current.emit("send-message", newMessage);
       setMessage("");
+      inputRef.current?.focus(); 
     } catch (error) {
       toast.error("Failed to send message");
     } finally {
@@ -352,10 +355,12 @@ const Project = () => {
             <div className="relative flex items-center bg-white  rounded-full">
               <input
                 type="text"
+                ref={inputRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="w-full p-3 pr-12 border rounded-full focus:outline-none focus:border-blue-500"
+                autoFocus
               />
               <button
                 type="submit"
