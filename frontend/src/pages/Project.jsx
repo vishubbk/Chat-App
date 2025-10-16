@@ -350,7 +350,9 @@ const Project = () => {
               ))}
             <div ref={messagesEndRef} />
           </div>
-          <form onSubmit={handleSendMessage} className="msg  mt-5 w-full p-4">
+
+          {/* input */}
+          <form onSubmit={handleSendMessage} className="msg  w-full p-4">
             <div className="relative flex items-center bg-white  rounded-full">
               <input
                 type="text"
