@@ -73,7 +73,6 @@ const Project = () => {
           // Extract AI plain text
           const textMatch = aiMsg.content.match(/"text":\s*"([^"]+)"/);
           const cleanText = textMatch ? textMatch[1] : null;
-          console.log("🧠 AI Text:", cleanText);
 
           // ✅ Extract fileTree JSON dynamically
           const fileTreeMatch = aiMsg.content.match(
@@ -83,7 +82,6 @@ const Project = () => {
             try {
               const dynamicTree = JSON5.parse(fileTreeMatch[1]);
               setFileTree(dynamicTree);
-              console.log("📁 Updated FileTree:", dynamicTree);
             } catch (e) {
               console.warn("Error parsing fileTree:", e.message);
             }
@@ -241,7 +239,7 @@ const Project = () => {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full ">
       <div className="flex flex-col lg:flex-row w-full h-screen">
         {/* LEFT SECTION */}
         <section className="lg:w-[30%] w-full h-full bg-zinc-200 relative">
@@ -304,7 +302,7 @@ const Project = () => {
           </header>
 
           {/* Messages */}
-          <div className="Messages text w-full h-[70vh] -mb-6 overflow-y-auto p-4">
+          <div className="Messages w-full h-[70vh] overflow-y-auto p-4 flex flex-col gap-2 ">
             {Array.isArray(messages) &&
               messages.map((msg, idx) => (
                 <div
@@ -314,36 +312,44 @@ const Project = () => {
                   }`}
                 >
                   <div
-                    className={`relative mx-2 my-3 rounded-xl px-4 py-2 max-w-[70%]  ${
-                      msg.sender === "ai"
-                        ? "bg-black text-white"
-                        : msg.sender === user?.email
-                        ? "bg-gray-300"
-                        : "bg-[#281a1a28]"
-                    }`}
+                    className={`relative mx-2 my-1 rounded-2xl px-4 py-2 max-w-[75%] break-words shadow-sm
+                      ${
+                        msg.sender === "ai"
+                          ? "bg-black text-white"
+                          : msg.sender === user?.email
+                          ? "bg-blue-100 text-gray-900"
+                          : "bg-gray-200 text-gray-800"
+                      }
+                    `}
                   >
                     <div className="flex flex-col">
-                      <small className="text-xs font-semiboadd server.js and gitignore and controllders and middlewares ld opacity-65 mb-1">
+                      <span className="text-xs font-semibold opacity-70 mb-1">
                         {msg.sender === user?.email
                           ? "You"
                           : msg.sender === "ai"
                           ? "AI"
                           : msg.sender}
-                      </small>
-
-                      <div className="overflow-x-auto">
+                      </span>
+                      <div className="overflow-x-auto text-sm">
                         {WriteAiMessage(msg.content)}
                       </div>
+                      <span className="text-[0.7rem] text-gray-400 mt-1 self-end">
+                        {msg.timestamp
+                          ? new Date(msg.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })
+                          : ""}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
             <div ref={messagesEndRef} />
           </div>
-
-          {/* Input */}
-          <form onSubmit={handleSendMessage} className="msg  w-full p-4">
-            <div className="relative flex items-center bg-white mt-2 rounded-full">
+          <form onSubmit={handleSendMessage} className="msg  mt-5 w-full p-4">
+            <div className="relative flex items-center bg-white  rounded-full">
               <input
                 type="text"
                 value={message}
